@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -23,7 +24,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -57,8 +60,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun ViewContactsScreen(
     userId: Int = 0,
-    navController: NavController? = null,
-    modifier: Modifier = Modifier
+    navController: NavController?,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -95,204 +97,214 @@ fun ViewContactsScreen(
             }
         }
     }
+    Box(modifier = Modifier.fillMaxSize()){
     Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    )
+    {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+                .fillMaxWidth()
+                .padding(bottom = 20.dp, top = 32.dp)
         ) {
+            IconButton(
+                onClick = { navController?.popBackStack() },
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Your Contacts",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = "${contacts.size} contact${if (contacts.size > 1) "s" else ""} saved",
+                    fontSize = 12.sp,
+                    color = Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
+        if (isLoading) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 20.dp, top = 32.dp)
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.White.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
             ) {
-                IconButton(
-                    onClick = { navController?.popBackStack() },
-                    modifier = Modifier.align(Alignment.CenterStart)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+                Text(
+                    "Loading contacts...",
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
+            }
+        } else if (contacts.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.White.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
                 Column(
-                    modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Your Contacts",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        "No contacts yet",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${contacts.size} contact${if (contacts.size > 1) "s" else ""} saved",
-                        fontSize = 12.sp,
+                        "Add a new contact to get started",
                         color = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(top = 4.dp)
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
                 }
             }
-
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Loading contacts...",
-                        color = Color.White,
-                        fontSize = 16.sp
-                    )
+        } else {
+            val groupedContacts = contacts
+                .groupBy { contact ->
+                    contact.nom.firstOrNull()?.uppercaseChar() ?: '#'
                 }
-            } else if (contacts.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                .toSortedMap()
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                groupedContacts.forEach { (letter, contactsInGroup) ->
+                    item {
                         Text(
-                            "No contacts yet",
-                            color = Color.White,
+                            text = letter.toString(),
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            "Add a new contact to get started",
-                            color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(top = 8.dp)
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.Black.copy(alpha = 0f))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
-                }
-            } else {
-                val groupedContacts = contacts
-                    .groupBy { contact ->
-                        contact.nom.firstOrNull()?.uppercaseChar() ?: '#'
-                    }
-                    .toSortedMap()
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    groupedContacts.forEach { (letter, contactsInGroup) ->
-                        item {
-                            Text(text = letter.toString(),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color.Black.copy(alpha = 0f))
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
-                        }
+                    items(contactsInGroup) { contact ->
+                        ContactCard(
+                            contact = contact,
+                            onDelete = {
+                                contactToDelete = contact
+                                showDeleteDialog = true
+                            },
+                            onCall = {
+                                scope.launch {
+                                    val db = AppDatabase.getDatabase(context)
+                                    val updatedContact =
+                                        contact.copy(callCount = contact.callCount + 1)
+                                    db.contactDao().update(updatedContact)
 
-                        items(contactsInGroup) { contact ->
-                            ContactCard(
-                                contact = contact,
-                                onDelete = {
-                                    contactToDelete = contact
-                                    showDeleteDialog = true
-                                },
-                                onCall = {
-                                    scope.launch {
-                                        val db = AppDatabase.getDatabase(context)
-                                        val updatedContact = contact.copy(callCount = contact.callCount + 1)
-                                        db.contactDao().update(updatedContact)
+                                    contacts =
+                                        contacts.map { if (it.id == contact.id) updatedContact else it }
 
-                                        contacts = contacts.map { if (it.id == contact.id) updatedContact else it }
-
-                                        if (ActivityCompat.checkSelfPermission(
-                                                context,
-                                                android.Manifest.permission.CALL_PHONE
-                                            ) != PackageManager.PERMISSION_GRANTED
-                                        ) {
-                                            pendingCallNumber = contact.phoneNumber
-                                            callPermissionLauncher.launch(android.Manifest.permission.CALL_PHONE)
-                                        } else {
-                                            val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:${contact.phoneNumber}"))
-                                            context.startActivity(intent)
-                                            Log.d("CALL", "Calling: ${contact.phoneNumber}")
-                                        }
-                                    }
-                                },
-                                onEdit = {
-                                    contactToEdit = contact
-                                    showEditContactModal = true
-                                },
-                                onPin = {
-                                    scope.launch {
-                                        try {
-                                            val db = AppDatabase.getDatabase(context)
-                                            db.contactDao().togglePinContact(contact.id)
-                                            val updatedContact = db.contactDao().getContactById(contact.id)
-                                            contacts = db.contactDao().getContactsForUserSorted(userId)
-                                            withContext(Dispatchers.Main) {
-                                                val msg = if (updatedContact?.isPinned == true) "📌 Pinned! 😊" else "Unpinned 😕"
-                                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                                            }
-                                        } catch (e: Exception) {
-                                            Log.e("VIEW_CONTACTS", "Error pinning/unpinning contact", e)
-                                        }
+                                    if (ActivityCompat.checkSelfPermission(
+                                            context,
+                                            android.Manifest.permission.CALL_PHONE
+                                        ) != PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        pendingCallNumber = contact.phoneNumber
+                                        callPermissionLauncher.launch(android.Manifest.permission.CALL_PHONE)
+                                    } else {
+                                        val intent = Intent(
+                                            Intent.ACTION_CALL,
+                                            Uri.parse("tel:${contact.phoneNumber}")
+                                        )
+                                        context.startActivity(intent)
+                                        Log.d("CALL", "Calling: ${contact.phoneNumber}")
                                     }
                                 }
-                            )
-                        }
-                    }
-                }
-            }
-            if (showDeleteDialog && contactToDelete != null) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteDialog = false },
-                    title = { Text("Delete Contact") },
-                    text = { Text("Are you sure you want to delete ${contactToDelete!!.nom}?") },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            scope.launch {
-                                try {
-                                    val db = AppDatabase.getDatabase(context)
-                                    db.contactDao().delete(contactToDelete!!)
-                                    contacts =
-                                        contacts.filter { it.id != contactToDelete!!.id }
-                                    withContext(Dispatchers.Main) {
-                                        Toast.makeText(
-                                            context,
-                                            "Contact deleted",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                            },
+                            onEdit = {
+                                contactToEdit = contact
+                                showEditContactModal = true
+                            },
+                            onPin = {
+                                scope.launch {
+                                    try {
+                                        val db = AppDatabase.getDatabase(context)
+                                        db.contactDao().togglePinContact(contact.id)
+                                        val updatedContact =
+                                            db.contactDao().getContactById(contact.id)
+                                        contacts = db.contactDao().getContactsForUserSorted(userId)
+                                        withContext(Dispatchers.Main) {
+                                            val msg =
+                                                if (updatedContact?.isPinned == true) "📌 Pinned! 😊" else "Unpinned 😕"
+                                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("VIEW_CONTACTS", "Error pinning/unpinning contact", e)
                                     }
-                                } catch (e: Exception) {
-                                    Log.d("VIEW_CONTACTS", "Error deleting contact", e)
                                 }
                             }
-                            showDeleteDialog = false
-                        }) {
-                            Text("Delete")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel")
-                        }
+                        )
                     }
-                )
+                }
             }
-
-
         }
+        if (showDeleteDialog && contactToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Delete Contact") },
+                text = { Text("Are you sure you want to delete ${contactToDelete!!.nom}?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        scope.launch {
+                            try {
+                                val db = AppDatabase.getDatabase(context)
+                                db.contactDao().delete(contactToDelete!!)
+                                contacts =
+                                    contacts.filter { it.id != contactToDelete!!.id }
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "Contact deleted",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } catch (e: Exception) {
+                                Log.d("VIEW_CONTACTS", "Error deleting contact", e)
+                            }
+                        }
+                        showDeleteDialog = false
+                    }) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
+
+    }
 
     if (showEditContactModal && contactToEdit != null) {
         EditContactModal(
@@ -322,6 +334,37 @@ fun ViewContactsScreen(
             }
         )
     }
+        AddContactFAB(
+            onClick = {
+                navController?.navigate("addContact/$userId") {
+                    launchSingleTop = true
+                }
+
+            }
+        )
+}
 }
 
+@Composable
+fun AddContactFAB(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        FloatingActionButton(
+            onClick = onClick,
+            modifier = Modifier.size(60.dp),
+            containerColor = Color(0xFF0D47A1),
+            contentColor = Color.White
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Contact",
+                modifier = Modifier.size(30.dp)
+            )
+        }
+    }
+}
 

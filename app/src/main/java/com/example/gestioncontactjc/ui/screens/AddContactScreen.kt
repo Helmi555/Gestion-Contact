@@ -1,5 +1,6 @@
 package com.example.gestioncontactjc.ui.screens
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
@@ -55,11 +56,11 @@ import com.example.gestioncontactjc.data.model.Contact
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun AddContactScreen(
     userId: Int = 0,
     navController: NavController? = null,
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()

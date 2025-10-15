@@ -2,7 +2,9 @@ package com.example.gestioncontactjc.data.dao
 
 import androidx.room.*
 import com.example.gestioncontactjc.data.model.Contact
-import com.example.gestioncontactjc.data.model.User
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Dao
 interface ContactDao {
@@ -54,5 +56,19 @@ interface ContactDao {
 
     @Query("SELECT nom FROM contacts WHERE userId = :userId ORDER BY callCount DESC LIMIT 1")
     suspend fun getMostContactedName(userId: Int): String?
+
+    @Query("SELECT * FROM contacts WHERE userId = :userId ORDER BY id DESC LIMIT 5")
+    suspend fun getRecentContacts(userId: Int): List<Contact>
+
+
+    @Query("SELECT COUNT(*) as totalContacts, SUM(isPinned) as pinnedContacts, SUM(callCount) as totalCalls FROM contacts WHERE userId = :userId")
+    suspend fun getUserStats(userId: Int): UserStats?
+
+    data class UserStats(
+        val totalContacts: Int,
+        val pinnedContacts: Int,
+        val totalCalls: Int
+    )
+
 
 }

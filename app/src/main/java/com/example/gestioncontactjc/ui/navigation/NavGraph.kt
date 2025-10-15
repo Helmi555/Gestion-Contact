@@ -45,7 +45,6 @@ fun AppNavGraph() {
 
     Log.d("NAV", "startDestination = $startDestination, session=$session")
 
-    // safe resolver that avoids Bundle.getString cast issues
     fun resolveUserIdFromBundle(bundle: android.os.Bundle?): Int {
         if (bundle == null) return session?.first ?: sessionManager.getUserSession()?.first ?: 0
         val raw = bundle.get("userId")
@@ -57,54 +56,34 @@ fun AppNavGraph() {
         }
     }
 
-    // observe nav state
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // show bottom bar only on main routes
     val showBottomBar = currentRoute?.startsWith("home/") == true ||
             currentRoute?.startsWith("viewContacts/") == true ||
             currentRoute?.startsWith("viewPinnedContacts/") == true ||
-            currentRoute?.startsWith("profile/") == true
+            currentRoute?.startsWith("profile/") == true ||
+            currentRoute?.startsWith("addContact/") == true
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 val activeUserId = resolveUserIdFromBundle(navBackStackEntry?.arguments)
 
-                Box {
-                    Canvas(
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .fillMaxWidth()
-                            .height(60.dp)
-                    ) {
-                        val width = size.width
-                        val height = size.height
-                        val waveHeight = 25.dp.toPx()
-
-                        val path = Path().apply {
-                            moveTo(0f, 0f)
-                            lineTo(0f, height - waveHeight)
-                            quadraticBezierTo(
-                                width / 2, height + waveHeight,
-                                width, height - waveHeight
-                            )
-                            lineTo(width, 0f)
-                            close()
-                        }
-
-                        drawPath(
-                            path = path,
-                            color = Color(0xFF0D47A1)
-                        )
-                    }
-
+                Box(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .background(Color(0xFF0D47A1))
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(75.dp)
-                            .padding(bottom = 10.dp),
+                            .padding(bottom = 2.dp)
+                            .navigationBarsPadding()
+                            .fillMaxWidth()
+                            .height(60.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -114,6 +93,7 @@ fun AppNavGraph() {
                             val iconTint by animateColorAsState(
                                 if (selected) Color.White else Color(0xFFB3E5FC)
                             )
+                            val iconSize=if(selected) 36.dp else 30.dp
 
                             Box(
                                 modifier = Modifier
@@ -132,7 +112,7 @@ fun AppNavGraph() {
                                     imageVector = item.icon,
                                     contentDescription = item.label,
                                     tint = iconTint,
-                                    modifier = Modifier.size(28.dp)
+                                    modifier = Modifier.size(iconSize)
                                 )
                             }
                         }
@@ -201,13 +181,8 @@ fun AppNavGraph() {
                     Log.d("NAV HOME", "Passing user with ID: $uid")
                     HomeScreen(
                         userId = uid,
-                        navController = navController,
-                        onLogout = {
-                            sessionManager.clearSession()
-                            navController.navigate("login") {
-                                popUpTo("home/$uid") { inclusive = true }
-                            }
-                        }
+                        navController = navController
+
                     )
                 }
 
@@ -232,7 +207,24 @@ fun AppNavGraph() {
                     arguments = listOf(navArgument("userId") { type = NavType.IntType })
                 ) { backStackEntry ->
                     val uid = resolveUserIdFromBundle(backStackEntry.arguments)
-                    ProfileScreen(uid)
+                    ProfileScreen(uid,
+                        navController = navController,
+                            onLogout = {
+                            sessionManager.clearSession()
+                            navController.navigate("login") {
+                                popUpTo("home/$uid") { inclusive = true }
+                            }
+                        }
+                    )
+
+                }
+                composable("addContact/{userId}") {
+                    backStackEntry ->
+                    val uid = resolveUserIdFromBundle(backStackEntry.arguments)
+                    AddContactScreen(
+                        uid,
+                        navController,
+                        )
                 }
             }
         }
