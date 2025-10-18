@@ -1,5 +1,6 @@
 package com.example.gestioncontactjc.ui.screens
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -48,14 +49,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.gestioncontactjc.data.database.AppDatabase
 import com.example.gestioncontactjc.data.model.Contact
 import com.example.gestioncontactjc.ui.components.ContactCard
 import com.example.gestioncontactjc.ui.components.EditContactModal
+import com.example.gestioncontactjc.util.MessageFormat
+import com.example.gestioncontactjc.util.SmsUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 @Composable
 fun ViewContactsScreen(
@@ -260,6 +265,18 @@ fun ViewContactsScreen(
                                         Log.e("VIEW_CONTACTS", "Error pinning/unpinning contact", e)
                                     }
                                 }
+                            },
+                            onGetLocation = {
+                                scope.launch {
+                                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+                                        == PackageManager.PERMISSION_GRANTED) {
+                                        SmsUtils.sendSms(context, contact.phoneNumber, MessageFormat.locationRequest())
+                                        Log.d("CHAT", "Sent LOCREQ to ${contact.phoneNumber}")
+                                    } else {
+                                        // request permission or show message
+                                    }
+                                }
+
                             }
                         )
                     }

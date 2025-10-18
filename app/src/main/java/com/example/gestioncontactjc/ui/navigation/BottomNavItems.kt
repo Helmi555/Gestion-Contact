@@ -10,10 +10,10 @@ data class BottomNavItem(
     val label: String,
     val icon: ImageVector
 )
-
 val bottomNavItems = listOf(
     BottomNavItem("home", "Home", Icons.Default.Home),
     BottomNavItem("viewContacts", "Contacts", Icons.Default.AccountBox),
     BottomNavItem("viewPinnedContacts", "Pinned", Icons.Default.Star),
+    BottomNavItem("conversationsScreen", "Messages", Icons.Default.Email),
     BottomNavItem("profile", "Profile", Icons.Default.Person)
 )

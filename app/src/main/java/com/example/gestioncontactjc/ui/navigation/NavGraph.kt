@@ -1,12 +1,11 @@
 package com.example.gestioncontactjc.ui.navigation
 
 import android.util.Log
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,14 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.navigation.*
 import androidx.navigation.compose.*
 import com.example.gestioncontactjc.data.utils.SessionManager
 import com.example.gestioncontactjc.ui.screens.*
-import kotlin.times
 
 @Composable
 fun AppNavGraph() {
@@ -63,41 +62,41 @@ fun AppNavGraph() {
             currentRoute?.startsWith("viewContacts/") == true ||
             currentRoute?.startsWith("viewPinnedContacts/") == true ||
             currentRoute?.startsWith("profile/") == true ||
-            currentRoute?.startsWith("addContact/") == true
+            currentRoute?.startsWith("addContact/") == true ||
+            currentRoute ?.startsWith("conversationsScreen/") == true
+       //     || currentRoute ?.startsWith("conversationScreen/") == true
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 val activeUserId = resolveUserIdFromBundle(navBackStackEntry?.arguments)
-
                 Box(
                     modifier = Modifier
                         .navigationBarsPadding()
                         .fillMaxWidth()
-                        .height(60.dp)
+                        .height(70.dp)
                         .background(Color(0xFF0D47A1))
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 2.dp)
-                            .navigationBarsPadding()
-                            .fillMaxWidth()
-                            .height(60.dp),
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                        verticalAlignment = Alignment.Top,
+
+                        ) {
                         bottomNavItems.forEach { item ->
                             val selected = currentRoute?.contains(item.route) == true
-                            val offsetY by animateDpAsState(if (selected) (-10).dp else 0.dp)
+                          //  val offsetY by animateDpAsState(if (selected) (-12).dp else 0.dp)
                             val iconTint by animateColorAsState(
                                 if (selected) Color.White else Color(0xFFB3E5FC)
                             )
-                            val iconSize=if(selected) 36.dp else 30.dp
+                            val iconSize = if(selected) 32.dp else 24.dp
 
-                            Box(
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
-                                    .offset(y = offsetY)
+                                   // .offset(y = offsetY)
                                     .clip(CircleShape)
                                     .clickable {
                                         navController.navigate("${item.route}/$activeUserId") {
@@ -114,6 +113,14 @@ fun AppNavGraph() {
                                     tint = iconTint,
                                     modifier = Modifier.size(iconSize)
                                 )
+                                if (!selected) {
+                                    Text(
+                                        text = item.label,
+                                        fontSize = 10.sp,
+                                        color = iconTint,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
                             }
                         }
                     }
@@ -226,6 +233,22 @@ fun AppNavGraph() {
                         navController,
                         )
                 }
+                composable("conversationsScreen/{userId}") { backStackEntry ->
+                    val uid = resolveUserIdFromBundle(backStackEntry.arguments)
+                    ConversationsScreen(
+                        userId = uid,
+                        navController = navController
+                    )
+                }
+                composable(
+                    route = "conversationScreen/{contactId}",
+                    arguments = listOf(navArgument("contactId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val contactId = backStackEntry.arguments?.getInt("contactId") ?: 0
+                    ConversationScreen(contactId = contactId, navController = navController)
+                }
+
+
             }
         }
     }

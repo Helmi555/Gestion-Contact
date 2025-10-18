@@ -73,4 +73,10 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.preferences.ktx)
     implementation(libs.androidx.core.splashscreen)
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.android.gms:play-services-tasks:18.0.2")
+
+
 }
