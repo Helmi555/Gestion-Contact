@@ -137,49 +137,58 @@ fun HomeScreen(
         }
     }
 
+    Column(
+        modifier=Modifier.fillMaxSize()
+            .padding(
+                top = 20.dp
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 32.dp, start = 16.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+
+        )
+        {
+            Image(
+                painter = painterResource(id = R.drawable.gestion_contact_logo),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(40.dp)
+            )
+            Row {
+                Text(
+                    text = "Contact Manager ",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color  = Color(0xFFFFFFFF),
+
+                    )
+                Text(
+                    text = "Pro",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color  = Color(0xFF76A2EE),
+
+                    )
+            }
+
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = 24.dp, vertical = 12.dp),
 
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
-        ) {
+        )
+        {
             // Profile Section
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = 12.dp, start = 4.dp, end = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
 
-                )
-            {
-                Image(
-                    painter = painterResource(id = R.drawable.gestion_contact_logo),
-                    contentDescription = "App Logo",
-                    modifier = Modifier
-                        .size(40.dp)
-                )
-                Row {
-                    Text(
-                        text = "Contact Manager ",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color  = Color(0xFFFFFFFF),
-
-                        )
-                    Text(
-                        text = "Pro",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color  = Color(0xFF76A2EE),
-
-                        )
-                }
-
-            }
 
             Box(
                 modifier = Modifier
@@ -244,79 +253,97 @@ fun HomeScreen(
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatsCard("Total Contacts", totalContacts.toString(), modifier = Modifier.weight(1f))
+                StatsCard(
+                    "Total Contacts",
+                    totalContacts.toString(),
+                    modifier = Modifier.weight(1f)
+                )
                 StatsCard("Recent Added", recentAdded.toString(), modifier = Modifier.weight(1f))
                 StatsCard("Total Pinned", totalPinned.toString(), modifier = Modifier.weight(1f))
                 StatsCard("Most Called", mostCalled, modifier = Modifier.weight(1f))
             }
 
             // Action Buttons
-            Text(
-                text = "Recent Contacts",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 12.dp)
-            )
+            if (recentContacts.isNotEmpty()) {
+                Text(
+                    text = "Recent Contacts",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, bottom = 12.dp)
+                )
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
 
-            ) {
-                items(recentContacts) { contact ->
-                    RecentContactItem(
-                        contact = contact,
-                        onCallClick = {
-                            scope.launch {
-                                val db = AppDatabase.getDatabase(context)
-                                val updatedContact =
-                                    contact.copy(callCount = contact.callCount + 1)
-                                db.contactDao().update(updatedContact)
-                                val name = db.contactDao().getMostContactedName(userId)
-                                mostCalled = name ?: "None"
-                                recentContacts =
-                                    recentContacts.map { if (it.id == contact.id) updatedContact else it }
+                )
+                {
+                    items(recentContacts) { contact ->
+                        RecentContactItem(
+                            contact = contact,
+                            onCallClick = {
+                                scope.launch {
+                                    val db = AppDatabase.getDatabase(context)
+                                    val updatedContact =
+                                        contact.copy(callCount = contact.callCount + 1)
+                                    db.contactDao().update(updatedContact)
+                                    val name = db.contactDao().getMostContactedName(userId)
+                                    mostCalled = name ?: "None"
+                                    recentContacts =
+                                        recentContacts.map { if (it.id == contact.id) updatedContact else it }
 
 
-                                if (ActivityCompat.checkSelfPermission(
-                                        context,
-                                        android.Manifest.permission.CALL_PHONE
-                                    ) != PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    pendingCallNumber = contact.phoneNumber
-                                    callPermissionLauncher.launch(android.Manifest.permission.CALL_PHONE)
-                                } else {
-                                    val intent = Intent(
-                                        Intent.ACTION_CALL,
-                                        Uri.parse("tel:${contact.phoneNumber}")
-                                    )
-                                    context.startActivity(intent)
+                                    if (ActivityCompat.checkSelfPermission(
+                                            context,
+                                            android.Manifest.permission.CALL_PHONE
+                                        ) != PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        pendingCallNumber = contact.phoneNumber
+                                        callPermissionLauncher.launch(android.Manifest.permission.CALL_PHONE)
+                                    } else {
+                                        val intent = Intent(
+                                            Intent.ACTION_CALL,
+                                            Uri.parse("tel:${contact.phoneNumber}")
+                                        )
+                                        context.startActivity(intent)
+                                    }
                                 }
                             }
-                        }
-                    )
-                }
-                item {
-                    Box(
-                        modifier = Modifier
-                            .width(80.dp)
-                            .padding(8.dp)
-                            .clickable { navController?.navigate("viewContacts/$userId") },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("View All", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, "View All", modifier = Modifier.size(18.dp), tint = Color.White)
+                        )
+                    }
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .width(80.dp)
+                                .padding(8.dp)
+                                .clickable { navController?.navigate("viewContacts/$userId") },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    "View All",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowForward,
+                                    "View All",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
                 }
             }
 
-/*
+
+            /*
             PremiumActionButton(
                 icon = Icons.Default.Add,
                 title = "Add Contact",
@@ -383,6 +410,7 @@ fun HomeScreen(
                 modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
             )
         }
+    }
 
 }
 
@@ -406,8 +434,8 @@ fun StatsCard(
         ) {
             Text(
                 text = value,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

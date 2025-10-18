@@ -75,12 +75,13 @@ fun AppNavGraph() {
                         .navigationBarsPadding()
                         .fillMaxWidth()
                         .height(70.dp)
-                        .background(Color(0xFF0D47A1))
+                        .background(Color(0xFF0D47A1)),
+                    contentAlignment = Alignment.Center
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                            .padding(horizontal = 2.dp, vertical = 4.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.Top,
 

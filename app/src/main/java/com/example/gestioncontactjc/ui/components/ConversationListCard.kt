@@ -3,6 +3,7 @@ package com.example.gestioncontactjc.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -56,12 +57,21 @@ fun ConversationListCard(
                 )
             }
             if (contact.isPinned) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "Pinned",
-                    tint = Color.Yellow,
-                    modifier = Modifier.size(20.dp)
-                )
+                Box(modifier= Modifier
+                    .padding(6.dp)
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x22FFFFFF)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Pinned",
+                        tint = Color.Yellow,
+                        modifier = Modifier.size(26.dp)
+                            .clip(CircleShape)
+                    )
+                }
             }
         }
 
