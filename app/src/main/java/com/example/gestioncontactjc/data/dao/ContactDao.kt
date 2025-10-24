@@ -2,6 +2,7 @@ package com.example.gestioncontactjc.data.dao
 
 import androidx.room.*
 import com.example.gestioncontactjc.data.model.Contact
+import kotlinx.coroutines.flow.Flow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -20,6 +21,11 @@ interface ContactDao {
 
     @Query("SELECT * FROM contacts WHERE id = :contactId")
     suspend fun getContactById(contactId: Int): Contact?
+
+    @Query("SELECT * FROM contacts WHERE userId = :userId AND phoneNumber = :phoneNumber LIMIT 1")
+    suspend fun getContactByPhoneNumber(userId: Int, phoneNumber: String): Contact?
+
+
 
     @Query("SELECT * FROM contacts WHERE userId = :userId")
     suspend fun getContactsForUser(userId: Int): List<Contact>
@@ -69,6 +75,12 @@ interface ContactDao {
         val pinnedContacts: Int,
         val totalCalls: Int
     )
+
+    @Query("SELECT * FROM contacts WHERE userId = :userId ORDER BY isPinned DESC, updatedAt DESC")
+    fun getContactsForUserSortedFlow(userId: Int): Flow<List<Contact>>
+
+    @Query("SELECT * FROM contacts WHERE userId = :userId AND isPinned = 1 ORDER BY nom ASC")
+    fun getAllPinnedContactsFlow(userId: Int): Flow<List<Contact>>
 
 
 }

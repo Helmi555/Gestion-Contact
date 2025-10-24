@@ -1,8 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.gestioncontactjc">
 
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
+package="com.example.gestioncontactjc">
+
+    <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
@@ -13,6 +15,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
         android:name="android.hardware.telephony"
@@ -20,14 +23,23 @@
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GestionContactJC"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <!-- Single MapActivity entry (merged attributes) -->
+        <activity
+            android:name=".MapActivity"
+            android:exported="false"
+            android:label="@string/title_activity_map"
+            android:theme="@style/Theme.GestionContactJC" />
 
         <activity
             android:name=".MainActivity"
@@ -40,10 +52,8 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".receiver.SmsReceiver"
-            android:exported="true"
-            android:enabled="true">
+        <!-- receiver and service as needed -->
+        <receiver android:name=".receiver.SmsReceiver" android:enabled="true" android:exported="true">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
@@ -51,9 +61,9 @@
 
         <service
             android:name=".service.LocationService"
-            android:exported="false"
             android:enabled="true"
+            android:exported="false"
             android:foregroundServiceType="location" />
-
     </application>
+
 </manifest>

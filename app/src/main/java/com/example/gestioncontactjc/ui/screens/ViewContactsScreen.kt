@@ -53,6 +53,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.gestioncontactjc.data.database.AppDatabase
 import com.example.gestioncontactjc.data.model.Contact
+import com.example.gestioncontactjc.data.model.Sms
 import com.example.gestioncontactjc.ui.components.ContactCard
 import com.example.gestioncontactjc.ui.components.EditContactModal
 import com.example.gestioncontactjc.util.MessageFormat
@@ -60,6 +61,7 @@ import com.example.gestioncontactjc.util.SmsUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.core.net.toUri
 
 
 @Composable
@@ -237,7 +239,7 @@ fun ViewContactsScreen(
                                     } else {
                                         val intent = Intent(
                                             Intent.ACTION_CALL,
-                                            Uri.parse("tel:${contact.phoneNumber}")
+                                            "tel:${contact.phoneNumber}".toUri()
                                         )
                                         context.startActivity(intent)
                                         Log.d("CALL", "Calling: ${contact.phoneNumber}")
@@ -270,7 +272,13 @@ fun ViewContactsScreen(
                                 scope.launch {
                                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
                                         == PackageManager.PERMISSION_GRANTED) {
-                                        SmsUtils.sendSms(context, contact.phoneNumber, MessageFormat.locationRequest())
+                                        val sms = Sms(
+                                            address = contact.phoneNumber,
+                                            body = "LOCREQ: Please share your location",
+                                            isSender = true,
+                                            contactId =contact.id
+                                        )
+                                        SmsUtils.sendSms(context, contact.phoneNumber, MessageFormat.locationRequest(),sms)
                                         Log.d("CHAT", "Sent LOCREQ to ${contact.phoneNumber}")
                                     } else {
                                         // request permission or show message

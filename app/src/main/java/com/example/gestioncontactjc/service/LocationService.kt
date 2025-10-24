@@ -16,9 +16,15 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.gestioncontactjc.R
+import com.example.gestioncontactjc.data.database.AppDatabase
+import com.example.gestioncontactjc.data.model.Sms
+import com.example.gestioncontactjc.data.utils.SessionManager
 import com.example.gestioncontactjc.util.LocationUtils
 import com.example.gestioncontactjc.util.MessageFormat
 import com.example.gestioncontactjc.util.SmsUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class LocationService : Service() {
 
@@ -46,6 +52,7 @@ class LocationService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
+        val normalizedSender = normalizePhoneNumber(sender)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
@@ -55,11 +62,7 @@ class LocationService : Service() {
         }
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(NOTIF_ID, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
-            } else {
-                startForeground(NOTIF_ID, createNotification())
-            }
+            startForeground(NOTIF_ID, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
         } catch (e: Exception) {
             Log.e(TAG, "Foreground failed: ${e.message}")
         }
@@ -67,8 +70,29 @@ class LocationService : Service() {
         LocationUtils.getFreshLocation(this) { loc ->
             if (loc != null) {
                 val msg = MessageFormat.locationResponse(loc.latitude, loc.longitude)
-                SmsUtils.sendSms(this, sender, msg)
-                Log.d(TAG, "Sent location to $sender")
+
+                val sessionManager = SessionManager(this@LocationService)
+                val currentUserSession = sessionManager.getUserSession()
+                val currentUserId = currentUserSession?.first
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    val db = AppDatabase.getDatabase(this@LocationService)
+
+                    val receiverContact = currentUserId?.let { userId ->
+                        db.contactDao().getContactByPhoneNumber(userId, normalizedSender)
+                    }
+
+                    val sms = Sms(
+                        address = normalizedSender,
+                        body = msg,
+                        isSender = true,
+                        contactId = receiverContact?.id
+                    )
+                    SmsUtils.sendSms(this@LocationService, normalizedSender, msg,sms)
+
+                    db.smsDao().insert(sms)
+                }
+                Log.d(TAG, "Sent location to $normalizedSender")
             } else {
                 Log.e(TAG, "No location")
             }
@@ -84,12 +108,10 @@ class LocationService : Service() {
     }
 
     private fun createNotification(): Notification {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = getSystemService(NotificationManager::class.java)
-            if (nm.getNotificationChannel(CHANNEL_ID) == null) {
-                val ch = NotificationChannel(CHANNEL_ID, "Location", NotificationManager.IMPORTANCE_LOW)
-                nm.createNotificationChannel(ch)
-            }
+        val nm = getSystemService(NotificationManager::class.java)
+        if (nm.getNotificationChannel(CHANNEL_ID) == null) {
+            val ch = NotificationChannel(CHANNEL_ID, "Location", NotificationManager.IMPORTANCE_LOW)
+            nm.createNotificationChannel(ch)
         }
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
@@ -98,5 +120,9 @@ class LocationService : Service() {
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
+    }
+
+    private fun normalizePhoneNumber(phone: String): String {
+        return phone.replace("+216", "").replace(Regex("[^0-9]"), "")
     }
 }

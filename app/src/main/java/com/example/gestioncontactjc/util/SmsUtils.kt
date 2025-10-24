@@ -9,11 +9,19 @@ import android.content.IntentFilter
 import android.telephony.SmsManager
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.example.gestioncontactjc.data.database.AppDatabase
+import com.example.gestioncontactjc.data.model.Sms
+import com.example.gestioncontactjc.service.LocationService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlin.collections.set
 
 object SmsUtils {
     private const val TAG = "SmsUtils"
 
-    fun sendSms(context: Context, phoneNumber: String?, body: String) {
+    fun sendSms(context: Context, phoneNumber: String?, body: String,newSms: Sms) {
         if (phoneNumber.isNullOrBlank()) {
             Log.e(TAG, "sendSms: empty phone")
             return
@@ -51,6 +59,14 @@ object SmsUtils {
             val sentReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context, intent: Intent) {
                     Log.d(TAG, "SENT callback for $phoneNumber result=${resultCode}")
+                    if (resultCode == android.app.Activity.RESULT_OK) {
+                        val db = AppDatabase.getDatabase(context)
+                        CoroutineScope(Dispatchers.IO).launch {
+                            db.smsDao().insert(newSms)
+
+                            Log.d(TAG, "SMS saved : $newSms")
+                        }
+                    }
                     try { ctx.unregisterReceiver(this) } catch (_: Exception) {}
                 }
             }
@@ -74,6 +90,7 @@ object SmsUtils {
             } else {
                 smsManager.sendTextMessage(phoneNumber, null, body, sentIntent, deliveredIntent)
             }
+
 
             Log.d(TAG, "sendSms: PUBLISHED to SmsManager -> to=$phoneNumber body=${body.take(200)}")
         } catch (e: Exception) {

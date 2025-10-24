@@ -21,7 +21,6 @@ interface SmsDao {
     @Query("SELECT * FROM sms_messages WHERE id = :id")
     suspend fun getById(id: Int): Sms?
 
-    // All SMS for all contacts owned by a specific user
     @Query("""
         SELECT s.* FROM sms_messages s
         JOIN contacts c ON s.contactId = c.id
@@ -36,4 +35,7 @@ interface SmsDao {
 
     @Query("DELETE FROM sms_messages WHERE contactId = :contactId")
     suspend fun deleteByContactId(contactId: Int)
+
+    @Query("SELECT * FROM sms_messages WHERE contactId = :contactId ORDER BY timestamp DESC LIMIT 1")
+    fun getLastMessageByContactId(contactId: Int): Flow<Sms?>
 }

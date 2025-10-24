@@ -20,14 +20,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.gestioncontactjc.data.database.AppDatabase
-import com.example.gestioncontactjc.data.model.Contact
 import com.example.gestioncontactjc.data.model.Sms
 import com.example.gestioncontactjc.ui.components.ConversationListCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import kotlinx.coroutines.flow.firstOrNull
 
 @Composable
 fun ConversationsScreen(
@@ -35,30 +33,23 @@ fun ConversationsScreen(
     navController: NavController? = null
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var contacts by remember { mutableStateOf<List<Contact>>(emptyList()) }
-    var lastMessages by remember { mutableStateOf<Map<Int, Sms>>(emptyMap()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val db = remember { AppDatabase.getDatabase(context) }
 
-    LaunchedEffect(userId) {
-        scope.launch(Dispatchers.IO) {
-            try {
-                val db = AppDatabase.getDatabase(context)
-                contacts = db.contactDao().getContactsForUserSorted(userId)
-                val messagesMap = mutableMapOf<Int, Sms>()
-                contacts.forEach { contact ->
-                    val lastMsg = db.smsDao().getByContactId(contact.id).firstOrNull()?.lastOrNull()
-                    if (lastMsg != null) messagesMap[contact.id] = lastMsg
-                }
-                contacts = contacts.filter { messagesMap.containsKey(it.id) }
-                lastMessages = messagesMap
+    // AUTO-REFRESH: Contacts flow
+    val contactsFlow = remember(userId) {
+        db.contactDao().getContactsForUserSortedFlow(userId)
+    }
+    val contacts by contactsFlow.collectAsState(initial = emptyList())
 
-            } catch (e: Exception) {
-                Log.e("ConversationsScreen", "Error loading contacts/messages", e)
-            } finally {
-                isLoading = false
-            }
-        }
+    val lastMessages = contacts.associate { contact ->
+        contact.id to produceState<Sms?>(initialValue = null, contact.id, contacts) {
+            val flow = db.smsDao().getLastMessageByContactId(contact.id)
+            flow.collect { msg -> value = msg }
+        }.value
+    }.filterValues { it != null } as Map<Int, Sms>
+
+    val contactsWithMessages = remember(contacts, lastMessages) {
+        contacts.filter { lastMessages.containsKey(it.id) }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -68,8 +59,7 @@ fun ConversationsScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
-        )
-        {
+        ) {
             // Header
             Box(
                 modifier = Modifier
@@ -98,7 +88,7 @@ fun ConversationsScreen(
                         color = Color.White
                     )
                     Text(
-                        text = "${contacts.size} conversation${if (contacts.size > 1) "s" else ""}",
+                        text = "${contactsWithMessages.size} conversation${if (contactsWithMessages.size != 1) "s" else ""}",
                         fontSize = 12.sp,
                         color = Color.White.copy(alpha = 0.7f),
                         modifier = Modifier.padding(top = 4.dp)
@@ -107,11 +97,7 @@ fun ConversationsScreen(
             }
 
             // Content
-            if (isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Loading conversations...", color = Color.White)
-                }
-            } else if (contacts.isEmpty()) {
+            if (contactsWithMessages.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -126,7 +112,7 @@ fun ConversationsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(contacts) { contact ->
+                    items(contactsWithMessages) { contact ->
                         ConversationListCard(
                             contact = contact,
                             lastMessage = lastMessages[contact.id],
