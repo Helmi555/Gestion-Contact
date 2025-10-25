@@ -25,6 +25,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import android.os.Build
+import androidx.lifecycle.lifecycleScope
+import com.example.gestioncontactjc.api.ServerApi
 import kotlin.text.compareTo
 
 class MainActivity : ComponentActivity() {
@@ -75,6 +77,12 @@ class MainActivity : ComponentActivity() {
             }
 
         }
+      lifecycleScope.launch {
+    // val postResult = ServerApi.postPosition("alice", "12345", 1.23, 4.56)
+     //Log.d("ServerTest", "POST result: $postResult")
+     val listResult = ServerApi.fetchPositions()
+     Log.d("ServerTest", "LIST result: $listResult")
+ }
 
         //Seed initial data
 CoroutineScope(Dispatchers.IO).launch {

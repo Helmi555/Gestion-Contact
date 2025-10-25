@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-
-package="com.example.gestioncontactjc">
+    package="com.example.gestioncontactjc">
 
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.SEND_SMS" />
@@ -22,6 +21,7 @@ package="com.example.gestioncontactjc">
         android:required="false" />
 
     <application
+        android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -34,7 +34,6 @@ package="com.example.gestioncontactjc">
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <!-- Single MapActivity entry (merged attributes) -->
         <activity
             android:name=".MapActivity"
             android:exported="false"
@@ -52,7 +51,6 @@ package="com.example.gestioncontactjc">
             </intent-filter>
         </activity>
 
-        <!-- receiver and service as needed -->
         <receiver android:name=".receiver.SmsReceiver" android:enabled="true" android:exported="true">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
@@ -65,5 +63,4 @@ package="com.example.gestioncontactjc">
             android:exported="false"
             android:foregroundServiceType="location" />
     </application>
-
 </manifest>
