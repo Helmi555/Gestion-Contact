@@ -15,5 +15,6 @@ val bottomNavItems = listOf(
     BottomNavItem("viewContacts", "Contacts", Icons.Default.AccountBox),
     BottomNavItem("viewPinnedContacts", "Pinned", Icons.Default.Star),
     BottomNavItem("conversationsScreen", "Messages", Icons.Default.Email),
+    BottomNavItem("positionsScreen", "Locations", Icons.Default.LocationOn),
     BottomNavItem("profile", "Profile", Icons.Default.Person)
 )

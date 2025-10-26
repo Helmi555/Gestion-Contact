@@ -63,6 +63,7 @@ fun AppNavGraph() {
             currentRoute?.startsWith("viewPinnedContacts/") == true ||
             currentRoute?.startsWith("profile/") == true ||
             currentRoute?.startsWith("addContact/") == true ||
+            currentRoute?.startsWith("positionsScreen/") == true ||
             currentRoute ?.startsWith("conversationsScreen/") == true
        //     || currentRoute ?.startsWith("conversationScreen/") == true
 
@@ -248,6 +249,14 @@ fun AppNavGraph() {
                     val contactId = backStackEntry.arguments?.getInt("contactId") ?: 0
                     ConversationScreen(contactId = contactId, navController = navController)
                 }
+                composable(
+                    route = "positionsScreen/{userId}",
+                    arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val contactId = resolveUserIdFromBundle(backStackEntry.arguments)
+                    PositionsScreen(contactId = contactId, navController = navController)
+                }
+
 
 
             }

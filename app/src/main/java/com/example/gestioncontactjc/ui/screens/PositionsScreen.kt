@@ -27,7 +27,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 
 @Composable
-fun PositionsScreen(navController: NavController? = null) {
+fun PositionsScreen(
+    contactId: Int,
+    navController: NavController? = null
+) {
     var positions by remember { mutableStateOf<List<Position>>(emptyList()) }
     val scope = rememberCoroutineScope()
 
@@ -67,7 +70,7 @@ fun PositionsScreen(navController: NavController? = null) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Positions",
+                        text = "Positions for #$contactId",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White

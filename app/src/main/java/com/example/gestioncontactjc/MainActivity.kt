@@ -78,10 +78,10 @@ class MainActivity : ComponentActivity() {
 
         }
       lifecycleScope.launch {
-    // val postResult = ServerApi.postPosition("alice", "12345", 1.23, 4.56)
-     //Log.d("ServerTest", "POST result: $postResult")
-     val listResult = ServerApi.fetchPositions()
-     Log.d("ServerTest", "LIST result: $listResult")
+        // val postResult = ServerApi.postPosition("alice", "12345", 1.23, 4.56)
+         //Log.d("ServerTest", "POST result: $postResult")
+         val listResult = ServerApi.fetchPositions()
+         Log.d("ServerTest", "LIST result: $listResult")
  }
 
         //Seed initial data
