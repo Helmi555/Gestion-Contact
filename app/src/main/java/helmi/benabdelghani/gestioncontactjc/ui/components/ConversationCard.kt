@@ -1,5 +1,6 @@
 package helmi.benabdelghani.gestioncontactjc.ui.components
 
+import android.R.id.message
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,10 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import helmi.benabdelghani.gestioncontactjc.data.model.Sms
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
@@ -24,7 +30,11 @@ fun ConversationCard(
     val alignment = if (sms.isSender) Alignment.End else Alignment.Start
     val textColor = Color.White
 
-    val timestamp = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(sms.timestamp))
+    val formatter = DateTimeFormatter.ofPattern("EEE, HH:mm")
+    val instant = Instant.ofEpochMilli(sms.timestamp)
+    val timestamp = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).format(formatter)
+
+
 
     Row(
         modifier = modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -56,8 +66,9 @@ fun ConversationCard(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = timestamp,
-                color = textColor.copy(alpha = 0.6f),
-                fontSize = 10.sp,
+                color = textColor.copy(alpha = 0.8f),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.align(alignment)
             )
         }

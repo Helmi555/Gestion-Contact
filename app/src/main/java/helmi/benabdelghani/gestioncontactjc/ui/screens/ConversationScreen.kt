@@ -32,26 +32,24 @@ fun ConversationScreen(
     navController: NavController? = null
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var messages by remember { mutableStateOf<List<Sms>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val db = AppDatabase.getDatabase(context)
     var contactName by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(true) }
+
+    val messagesFlow = remember(contactId) { db.smsDao().getByContactIdFlow(contactId) }
+    val messages by messagesFlow.collectAsState(initial = emptyList())
 
     LaunchedEffect(contactId) {
-        scope.launch(Dispatchers.IO) {
-            try {
-                val db = AppDatabase.getDatabase(context)
-                messages = db.smsDao().getByContactId(contactId).firstOrNull() ?: emptyList()
-                val contact = db.contactDao().getContactById(contactId)
-                contactName = contact?.nom ?: "Conversation"
-                Log.d(("ConversationScreen"), "Loaded ${messages.size} messages for contact ID $contactId and name $contactName")
-            } catch (e: Exception) {
-                Log.e("ConversationScreen", "Error loading messages", e)
-            } finally {
-                isLoading = false
-            }
+        try {
+            val contact = db.contactDao().getContactById(contactId)
+            contactName = contact?.nom ?: "Conversation"
+        } catch (e: Exception) {
+            Log.e("ConversationScreen", "Error loading contact", e)
+        } finally {
+            isLoading = false
         }
     }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

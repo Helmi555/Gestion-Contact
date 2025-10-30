@@ -38,4 +38,7 @@ interface SmsDao {
 
     @Query("SELECT * FROM sms_messages WHERE contactId = :contactId ORDER BY timestamp DESC LIMIT 1")
     fun getLastMessageByContactId(contactId: Int): Flow<Sms?>
+
+    @Query("SELECT * FROM sms_messages WHERE contactId=:id ORDER BY timestamp ASC")
+    fun getByContactIdFlow(id: Int): Flow<List<Sms>>
 }

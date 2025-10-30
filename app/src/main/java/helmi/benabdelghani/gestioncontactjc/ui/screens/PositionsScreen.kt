@@ -1,8 +1,12 @@
 // kotlin
 package helmi.benabdelghani.gestioncontactjc.ui.screens
 
+import android.app.Activity
 import android.content.Intent
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +49,18 @@ fun PositionsScreen(
     var positions by remember { mutableStateOf<List<Position>>(emptyList()) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val activity = context as ComponentActivity
+
+    val addPositionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            coroutineScope.launch {
+                positions = PositionRepository.fetchPositions(contactId)
+                onCountChange(positions.size)
+            }
+        }
+    }
 
     LaunchedEffect(contactId) {
         positions = PositionRepository.fetchPositions(contactId)
@@ -90,7 +106,13 @@ fun PositionsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
-        AddPositionFAB (onClick = {})
+
+        AddPositionFAB(onClick = {
+            val intent = Intent(context, MapActivity::class.java)
+            intent.putExtra(MapActivity.EXTRA_MODE, "add")
+            intent.putExtra(MapActivity.EXTRA_USERID, contactId)
+            addPositionLauncher.launch(intent)
+        })
 
     }
 
