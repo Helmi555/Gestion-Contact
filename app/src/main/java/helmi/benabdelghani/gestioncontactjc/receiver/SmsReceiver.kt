@@ -1,22 +1,20 @@
-package com.example.gestioncontactjc.receiver
+package helmi.benabdelghani.gestioncontactjc.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import android.util.Log
-import com.example.gestioncontactjc.data.database.AppDatabase
-import com.example.gestioncontactjc.data.model.Sms
-import com.example.gestioncontactjc.data.utils.SessionManager
-import com.example.gestioncontactjc.service.LocationService
-import com.example.gestioncontactjc.util.MessageFormat
-import com.example.gestioncontactjc.util.NotificationUtils
+import helmi.benabdelghani.gestioncontactjc.data.database.AppDatabase
+import helmi.benabdelghani.gestioncontactjc.data.model.Sms
+import helmi.benabdelghani.gestioncontactjc.data.utils.SessionManager
+import helmi.benabdelghani.gestioncontactjc.service.LocationService
+import helmi.benabdelghani.gestioncontactjc.util.MessageFormat
+import helmi.benabdelghani.gestioncontactjc.util.NotificationUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-
-//TODO: adb -s emulator-5554 emu sms send 5556 "LOCREQ: please share your location"  and  adb -s emulator-5554 emu sms send 5554 "LOCRESP:35.633,10.9000"
 
 class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
@@ -49,7 +47,7 @@ class SmsReceiver : BroadcastReceiver() {
                     Log.d("SmsReceiver", "LOCREQ from $sender - starting service")
 
                     val serviceIntent = Intent(appContext, LocationService::class.java).apply {
-                        putExtra(LocationService.EXTRA_SENDER, normalizedSender)
+                        putExtra(LocationService.Companion.EXTRA_SENDER, normalizedSender)
                     }
 
                     appContext.startForegroundService(serviceIntent)
@@ -61,7 +59,7 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun saveReceivedSms(context: Context, sender: String, body: String) {
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 val sessionManager = SessionManager(context)
                 val currentUserSession = sessionManager.getUserSession()

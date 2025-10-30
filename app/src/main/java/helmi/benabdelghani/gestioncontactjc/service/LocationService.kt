@@ -1,4 +1,6 @@
-package com.example.gestioncontactjc.service
+package helmi.benabdelghani.gestioncontactjc.service
+
+
 
 import android.Manifest
 import android.app.Notification
@@ -9,22 +11,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.example.gestioncontactjc.R
-import com.example.gestioncontactjc.data.database.AppDatabase
-import com.example.gestioncontactjc.data.model.Sms
-import com.example.gestioncontactjc.data.utils.SessionManager
-import com.example.gestioncontactjc.util.LocationUtils
-import com.example.gestioncontactjc.util.MessageFormat
-import com.example.gestioncontactjc.util.SmsUtils
+import helmi.benabdelghani.gestioncontactjc.util.SmsUtils
+import helmi.benabdelghani.gestioncontactjc.R
+import helmi.benabdelghani.gestioncontactjc.data.database.AppDatabase
+import helmi.benabdelghani.gestioncontactjc.data.model.Sms
+import helmi.benabdelghani.gestioncontactjc.data.utils.SessionManager
+import helmi.benabdelghani.gestioncontactjc.util.LocationUtils
+import helmi.benabdelghani.gestioncontactjc.util.MessageFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
 
 class LocationService : Service() {
 

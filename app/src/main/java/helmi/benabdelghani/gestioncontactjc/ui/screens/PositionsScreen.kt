@@ -1,0 +1,121 @@
+// kotlin
+package helmi.benabdelghani.gestioncontactjc.ui.screens
+
+import android.content.Intent
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import helmi.benabdelghani.gestioncontactjc.data.model.Position
+import helmi.benabdelghani.gestioncontactjc.repository.PositionRepository
+import helmi.benabdelghani.gestioncontactjc.ui.components.PositionCard
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.LaunchedEffect
+import helmi.benabdelghani.gestioncontactjc.MapActivity
+import helmi.benabdelghani.gestioncontactjc.repository.PositionRepository.deletePosition
+import kotlinx.coroutines.launch
+
+
+@Composable
+fun PositionsScreen(
+    contactId: Int,
+    navController: NavController? = null,
+    onCountChange: (Int) -> Unit = {}
+) {
+    var positions by remember { mutableStateOf<List<Position>>(emptyList()) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(contactId) {
+        positions = PositionRepository.fetchPositions(contactId)
+        onCountChange(positions.size)
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize().padding(vertical = 24.dp)
+        ) {
+            items(positions, key = { it.idposition }) { pos ->
+                PositionCard(
+                    position = pos,
+                    onDelete = {
+                        coroutineScope.launch {
+                            val ok = deletePosition(pos.idposition)
+                            if (ok) {
+                                val newPositions =
+                                    positions.filter { it.idposition != pos.idposition }
+                                positions = newPositions
+                                onCountChange(newPositions.size)
+                                Toast.makeText(context, "Position deleted", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    },
+                    onClick = {
+                        val intent = Intent(context, MapActivity::class.java).apply {
+                            putExtra(MapActivity.EXTRA_LATITUDE, pos.latitude)
+                            putExtra(MapActivity.EXTRA_LONGITUDE, pos.longitude)
+                            putExtra(MapActivity.EXTRA_SENDER, pos.pseudo)
+                        }
+                        context.startActivity(intent)
+
+                    },
+
+                    )
+
+
+            }
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+        AddPositionFAB (onClick = {})
+
+    }
+
+}
+
+
+@Composable
+fun AddPositionFAB(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(end = 0.dp, bottom = 6.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        FloatingActionButton(
+            onClick = onClick,
+            modifier = Modifier.size(56.dp),
+            containerColor = Color(0xFF0D47A1),
+            contentColor = Color.White
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Position",
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
