@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gestioncontactjc"
+    namespace = "helmi.benabdelghani.gestioncontactjc"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.gestioncontactjc"
+        applicationId = "helmi.benabdelghani.gestioncontactjc"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
@@ -86,5 +86,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
-
+    implementation("com.google.accompanist:accompanist-pager:0.34.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
 }
