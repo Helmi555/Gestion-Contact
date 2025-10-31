@@ -250,7 +250,6 @@ fun PinnedContactsScreen(
 
                                         pinnedContacts = newPinnedList
 
-                                        // Show toast
                                         val wasPinned = contact.isPinned
                                         val msg = if (wasPinned) "Unpinned 😕" else "📌 Pinned! 😊"
                                         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()

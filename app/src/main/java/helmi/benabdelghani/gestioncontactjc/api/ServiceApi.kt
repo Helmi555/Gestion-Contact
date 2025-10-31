@@ -19,7 +19,8 @@ object ServerApi {
             .writeTimeout(10, TimeUnit.SECONDS)
             .build()
 
-        private const val BASE_URL = "http://10.0.2.2/servicephp"
+       // private const val BASE_URL = "http://10.0.2.2/servicephp"
+        private const val BASE_URL = "http://192.168.59.22/servicephp"
 
         private fun errorJson(msg: String) = "{\"success\":0,\"message\":\"$msg\"}"
 

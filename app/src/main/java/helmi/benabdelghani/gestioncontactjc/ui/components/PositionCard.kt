@@ -110,7 +110,7 @@ fun PositionCard(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = Color(0xFFD02E2A),
+                    tint = Color(0xFFF83232),
                     modifier = Modifier.size(26.dp)
                 )
             }
@@ -121,7 +121,6 @@ fun PositionCard(
     }
 }
 
-// Helper extension to shorten coordinates
 private fun Double.toShortString(): String {
     return if (this == 0.0) "0.0" else "%.4f".format(this)
 }

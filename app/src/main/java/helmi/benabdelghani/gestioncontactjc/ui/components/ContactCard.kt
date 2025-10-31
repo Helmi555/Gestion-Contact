@@ -217,7 +217,7 @@ private fun SmallCircleButton(
 ) {
     Box(
         modifier = modifier
-            .size(44.dp)
+            .size(42.dp)
             .clip(CircleShape)
             .background(background)
             .clickable(onClick = onClick)
@@ -228,7 +228,7 @@ private fun SmallCircleButton(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = tint,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(18.dp)
         )
     }
 }

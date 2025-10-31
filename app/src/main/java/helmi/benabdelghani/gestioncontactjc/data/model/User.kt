@@ -10,7 +10,7 @@ data class User (
     val password: String,
     val name: String,
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long? = null
-
+    val updatedAt: Long? = null,
+    val earnedPoints:Int=0
 
 )

@@ -25,4 +25,6 @@ interface UserDao {
     @Query("SELECT * FROM users")
     suspend fun getAllUsers(): List<User>
 
+    @Query("UPDATE users SET earnedPoints = earnedPoints + :points WHERE id = :userId")
+    suspend fun addPoints(userId: Int, points: Int)
 }
