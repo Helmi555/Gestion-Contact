@@ -274,15 +274,15 @@ fun HomeScreen(
 
             Row(
                 modifier = Modifier
-                    .background(Color(0xFF76A2EE), shape = RoundedCornerShape(20.dp))
-                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                    .background(Color(0xFF76A2EE), shape = RoundedCornerShape(18.dp))
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "Points",
                     tint = Color.White,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
@@ -454,7 +454,7 @@ fun HomeScreen(
                                     val totalSeconds = ((finalSession.endTime ?: 0L) - (finalSession.startTime ?: 0L)) / 1000
                                     val minutes = totalSeconds / 60
                                     val seconds = totalSeconds % 60
-                                    val formatted = "$minutes min $seconds s"
+                                    val formatted = "$minutes"+"min"+"$seconds"+"s"
 
                                     completedSessionData = Triple(finalSession.totalDistance, finalSession.points, formatted)
                                     showCongratsDialog = true

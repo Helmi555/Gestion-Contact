@@ -2,5 +2,6 @@
     <string name="app_name">Gestion Contact JC</string>
     <string name="google_maps_key">AIzaSyBeZ12hJyST2AG7vD_lg8XLtKfnJ0nolYc</string>
     <string name="title_activity_map">MapActivity</string>
+    <string name="title_activity_session_map">SessionMapActivity</string>
 
 </resources>

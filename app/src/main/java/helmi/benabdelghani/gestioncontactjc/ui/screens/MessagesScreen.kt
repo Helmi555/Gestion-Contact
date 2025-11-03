@@ -34,16 +34,15 @@ fun MessagesScreen(
     contactId: Int,
     navController: NavController? = null
 ) {
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
     val scope = rememberCoroutineScope()
-    val tabs = listOf("Conversations", "Positions")
-
+    val tabs = listOf("Conversations", "Positions","Sessions")
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { tabs.size})
     var conversationsCount by remember { mutableStateOf<Int?>(null) }
     var positionsCount by remember { mutableStateOf<Int?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -89,7 +88,7 @@ fun MessagesScreen(
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(0.90f)
+                    .fillMaxWidth()
                     .height(50.dp)
                     .clip(RoundedCornerShape(28.dp))
                     .background(
@@ -100,9 +99,10 @@ fun MessagesScreen(
                             )
                         )
                     )
-                    .padding(6.dp),
+                    .padding(4.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
+            )
+            {
                 tabs.forEachIndexed { index, title ->
                     Box(
                         modifier = Modifier
@@ -125,21 +125,21 @@ fun MessagesScreen(
                             )
                             .clickable { scope.launch { pagerState.animateScrollToPage(index) } }
                             .shadow(
-                                elevation = if (pagerState.currentPage == index) 8.dp else 0.dp,
+                                elevation = if (pagerState.currentPage == index) 6.dp else 0.dp,
                                 shape = RoundedCornerShape(22.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = title,
-                            fontSize = if (pagerState.currentPage == index) 16.sp else 15.sp,
+                            fontSize = if (pagerState.currentPage == index) 15.sp else 14.sp,
                             fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Medium,
                             color = if (pagerState.currentPage == index) Color.White else Color.White.copy(alpha = 0.6f)
                         )
                     }
 
                     if (index < tabs.size - 1) {
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
                     }
                 }
             }
@@ -159,6 +159,11 @@ fun MessagesScreen(
                     )
                     1 -> PositionsScreen(
                         contactId = contactId,
+                        navController = navController,
+                        onCountChange = { positionsCount = it }
+                    )
+                    2 -> SessionsScreen(
+                        userId = contactId,
                         navController = navController,
                         onCountChange = { positionsCount = it }
                     )

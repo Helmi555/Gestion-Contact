@@ -1,6 +1,7 @@
 package helmi.benabdelghani.gestioncontactjc.data.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -27,4 +28,8 @@ interface TrackingSessionDao {
 
     @Query("UPDATE tracking_sessions SET totalDistance = :distance WHERE id = :sessionId")
     fun updateSessionDistance(sessionId: Int, distance: Double)
+
+    @Delete
+    fun deleteSession(session: TrackingSession)
+
 }
